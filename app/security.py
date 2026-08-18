@@ -9,11 +9,11 @@ ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
 def hash_password(password: str) -> str:
-    '''Хэширует пароль перед сохранением в базу данных'''
+    """Хэширует пароль перед сохранением в базу данных"""
     return pwd_context.hash(password)
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
-    '''Проверяет, соответствует ли обычный пароль сохранённому хэшу'''
+    """Проверяет, соответствует ли обычный пароль сохранённому хэшу"""
     return pwd_context.verify(plain_password, hashed_password)
 
 def create_access_token(data: dict) -> str:
