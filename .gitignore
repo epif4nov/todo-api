@@ -1,32 +1,11 @@
-# IDE
+.env
+*.db
+
 .idea/
-.vscode/
+.pytest_cache/
 
-# Python
-__pycache__/
-*.py[cod]
-*.pyo
-*.pyc
-
-# Virtual environment
 .venv/
 .venv312/
-venv/
-env/
 
-# Environment variables
-.env
-
-# Database
-*.db
-*.sqlite
-*.sqlite3
-
-# Tests
-.pytest_cache/
-.coverage
-htmlcov/
-
-# OS
-.DS_Store
-Thumbs.db
+__pycache__/
+*.pyc
