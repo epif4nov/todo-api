@@ -11,3 +11,5 @@ class Settings(BaseSettings):
 
 
 settings = Settings()
+
+JWT_ALGORITHM: str = "HS256"

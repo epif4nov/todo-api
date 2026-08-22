@@ -6,6 +6,8 @@ from app.database import SessionLocal
 from app.security import decode_access_token
 from app.models import User
 
+from app.services.users import get_user_by_email
+
 def get_db():
     """Создаёт сессию БД для одного запроса и закрывает её после"""
     db = SessionLocal()
@@ -31,7 +33,12 @@ def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(
                             detail="Не удалось подтвердить учётные данные",
                             headers={"WWW-Authenticate": "Bearer"})
 
-    user = db.query(User).filter(User.email == email).first()
+
+    user = get_user_by_email(
+        db,
+        email=email
+    )
+
     if user is None:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
                             detail="Не удалось подтвердить учётные данные",

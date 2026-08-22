@@ -1,15 +1,15 @@
 from passlib.context import CryptContext
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from jose import jwt, JWTError
 
 from app.config import settings
+
+from typing import Any
 
 pwd_context = CryptContext(
     schemes=["bcrypt"],
     deprecated="auto"
 )
-
-ALGORITHM = "HS256"
 
 def hash_password(password: str) -> str:
     """Хэширует пароль перед сохранением в базу данных"""
@@ -25,11 +25,13 @@ def verify_password(
         hashed_password)
 
 
-def create_access_token(data: dict) -> str:
+def create_access_token(
+        data: dict[str, Any]
+) -> str:
     """Создаёт JWT-токен с данными пользователя и сроком действия"""
     to_encode = data.copy()
 
-    expire = datetime.utcnow() + timedelta(
+    expire = datetime.now(timezone.utc) + timedelta(
         minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES
     )
 
@@ -38,7 +40,7 @@ def create_access_token(data: dict) -> str:
     return jwt.encode(
         to_encode,
         settings.SECRET_KEY,
-        algorithm=ALGORITHM
+        algorithm=settings.JWT_ALGORITHM
     )
 
 def decode_access_token(token: str) -> dict | None:
@@ -48,7 +50,7 @@ def decode_access_token(token: str) -> dict | None:
         payload = jwt.decode(
             token,
             settings.SECRET_KEY,
-            algorithms=[ALGORITHM]
+            algorithms=[settings.JWT_ALGORITHM]
         )
 
         return payload

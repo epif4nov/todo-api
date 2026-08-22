@@ -1,60 +1,69 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
 from app.dependencies import get_db, get_current_user
 from app.schemas import TaskCreate, TaskOut
-from app.models import Task, User
+from app.models import User
 
-router = APIRouter(prefix="/tasks", tags=["tasks"])
+from app.services.tasks import (
+    create_task,
+    get_user_tasks,
+    delete_task,
+    toggle_task
+)
+
+
+router = APIRouter(
+    prefix="/tasks",
+    tags=["tasks"]
+)
+
 
 @router.post("/", response_model=TaskOut)
-def create_task(task_data: TaskCreate, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
-    """Создаёт новую задачу для текущего пользователя"""
-    task = Task(title=task_data.title,
-                owner_id=current_user.id)
+def create(
+    task_data: TaskCreate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    return create_task(
+        db,
+        task_data,
+        current_user
+    )
 
-    db.add(task)
-    db.commit()
-    db.refresh(task)
-
-    return task
 
 @router.get("/", response_model=list[TaskOut])
-def get_tasks(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
-    tasks = db.query(Task).filter(Task.owner_id == current_user.id).all()
-    return tasks
+def get_tasks(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    return get_user_tasks(
+        db,
+        current_user
+    )
+
 
 @router.delete("/{task_id}")
-def delete_task(task_id: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
-    """Удаляет задачу пользователя по id"""
-    task = db.query(Task).filter(Task.id == task_id).first()
+def delete(
+    task_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    return delete_task(
+        db,
+        task_id,
+        current_user
+    )
 
-    if task is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Задача не найдена")
-
-    if task.owner_id != current_user.id:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Нет доступа к этой задаче")
-
-    db.delete(task)
-    db.commit()
-
-    return {"detail": "Задача удалена"}
 
 @router.patch("/{task_id}", response_model=TaskOut)
-def toggle_task(task_id: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
-    """Переключает статус выполнения задачи"""
-    task = db.query(Task).filter(Task.id == task_id).first()
-
-    if task is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Задача не найдена")
-
-    if task.owner_id != current_user.id:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Нет доступа к этой задаче")
-
-    task.is_done = not task.is_done
-
-    db.add(task)
-    db.commit()
-    db.refresh(task)
-
-    return task
+def toggle(
+    task_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    return toggle_task(
+        db,
+        task_id,
+        current_user
+    )
