@@ -2,11 +2,19 @@ import pytest
 
 def test_register(client):
     response = client.post("/auth/register", json={"email": "a@a.com", "password": "testpass123"})
+
+    print(response.status_code)
+    print(response.json())
+    data = response.json()
+
+    assert data["email"] == "a@a.com"
+    assert "id" in data
     assert response.status_code == 200
 
 def test_register_duplicate_email(client):
     response_1 = client.post("/auth/register", json={"email": "a@a.com", "password": "testpass1234"})
     response_2 = client.post("/auth/register", json={"email": "a@a.com", "password": "testpass12345"})
+
     assert response_1.status_code == 200
     assert response_2.status_code == 400
 
@@ -16,3 +24,23 @@ def test_login_success(client):
     assert response_r.status_code == 200
     assert response_l.status_code == 200
     assert "access_token" in response_l.json()
+
+def test_login_wrong_password(client):
+
+    client.post(
+        "/auth/register",
+        json={
+            "email": "a@a.com",
+            "password": "testpass123"
+        }
+    )
+
+    response = client.post(
+        "/auth/login",
+        data={
+            "username": "a@a.com",
+            "password": "wrongpass"
+        }
+    )
+
+    assert response.status_code == 401

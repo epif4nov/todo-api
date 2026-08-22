@@ -13,6 +13,7 @@ SQLALCHEMY_TEST_DATABASE_URL = "sqlite:///:memory:"
 engine = create_engine(
     SQLALCHEMY_TEST_DATABASE_URL, connect_args={"check_same_thread": False}, poolclass=StaticPool
 )
+
 TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 def override_get_db():
@@ -27,5 +28,7 @@ app.dependency_overrides[get_db] = override_get_db
 @pytest.fixture
 def client():
     Base.metadata.create_all(bind=engine)
-    yield TestClient(app)
+    with TestClient(app) as client:
+        yield client
+
     Base.metadata.drop_all(bind=engine)
