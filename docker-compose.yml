@@ -1,26 +1,54 @@
 services:
-
-  api:
-    build: .
-    container_name: todo-api
-    ports:
-      - "8001:8000"
-    env_file:
-      - .env.docker
-    depends_on:
-      - postgres
-
   postgres:
     image: postgres:16
     container_name: todo-postgres
+
     environment:
       POSTGRES_USER: todo
       POSTGRES_PASSWORD: todo
       POSTGRES_DB: todo
+
     ports:
       - "5434:5432"
+
     volumes:
       - todo_postgres_data:/var/lib/postgresql/data
+
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U todo -d todo"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+
+  migrate:
+    build: .
+    env_file:
+      - .env.docker
+
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+    command: ["alembic", "upgrade", "head"]
+
+    restart: "no"
+
+
+  api:
+    build: .
+    container_name: todo-api
+
+    ports:
+      - "8001:8000"
+
+    env_file:
+      - .env.docker
+
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+
 
 volumes:
   todo_postgres_data:
