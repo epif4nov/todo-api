@@ -1,10 +1,10 @@
+from datetime import UTC, datetime, timedelta
+from typing import Any
+
+from jose import JWTError, jwt
 from passlib.context import CryptContext
-from datetime import datetime, timedelta, timezone
-from jose import jwt, JWTError
 
 from app.config import settings
-
-from typing import Any
 
 pwd_context = CryptContext(
     schemes=["bcrypt"],
@@ -31,7 +31,7 @@ def create_access_token(
     """Создаёт JWT-токен с данными пользователя и сроком действия"""
     to_encode = data.copy()
 
-    expire = datetime.now(timezone.utc) + timedelta(
+    expire = datetime.now(UTC) + timedelta(
         minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES
     )
 

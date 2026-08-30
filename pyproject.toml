@@ -1,0 +1,17 @@
+[tool.ruff]
+target-version = "py314"
+line-length = 88
+
+[tool.ruff.lint]
+# Не позволяем --fix автоматически удалять импорты.
+# Иногда импорт нужен ради побочного эффекта, как в Alembic.
+unfixable = ["F401"]
+
+[tool.ruff.lint.flake8-bugbear]
+# Depends(...) — нормальный паттерн FastAPI.
+extend-immutable-calls = ["fastapi.Depends"]
+
+[tool.ruff.lint.per-file-ignores]
+# Alembic генерирует migration-файлы автоматически.
+# Не заставляем старые миграции соответствовать современному стилю typing/imports.
+"alembic/versions/*.py" = ["I", "UP"]

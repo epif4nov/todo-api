@@ -3,10 +3,10 @@ from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.orm import Session
 
 from app.database import SessionLocal
-from app.security import decode_access_token
 from app.models import User
-
+from app.security import decode_access_token
 from app.services.users import get_user_by_email
+
 
 def get_db():
     """Создаёт сессию БД для одного запроса и закрывает её после"""

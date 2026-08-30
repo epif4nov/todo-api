@@ -3,11 +3,7 @@ from sqlalchemy.orm import Session
 
 from app.models import User
 from app.schemas import UserCreate
-from app.security import (
-    hash_password,
-    verify_password,
-    create_access_token
-)
+from app.security import create_access_token, hash_password, verify_password
 
 
 def register_user(

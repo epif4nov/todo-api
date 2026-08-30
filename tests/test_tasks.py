@@ -1,6 +1,3 @@
-from app.models import User
-
-
 def get_token(client):
     client.post(
         "/auth/register",

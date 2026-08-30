@@ -1,17 +1,10 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
-from app.dependencies import get_db, get_current_user
-from app.schemas import TaskCreate, TaskOut
+from app.dependencies import get_current_user, get_db
 from app.models import User
-
-from app.services.tasks import (
-    create_task,
-    get_user_tasks,
-    delete_task,
-    toggle_task
-)
-
+from app.schemas import TaskCreate, TaskOut
+from app.services.tasks import create_task, delete_task, get_user_tasks, toggle_task
 
 router = APIRouter(
     prefix="/tasks",

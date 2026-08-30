@@ -1,4 +1,5 @@
-from pydantic import BaseModel, EmailStr, Field
+from pydantic import BaseModel
+
 
 class TaskCreate(BaseModel):
     title: str

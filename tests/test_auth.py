@@ -1,5 +1,3 @@
-import pytest
-
 def test_register(client):
     response = client.post("/auth/register", json={"email": "a@a.com", "password": "testpass123"})
 
