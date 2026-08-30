@@ -5,7 +5,6 @@ from jose import JWTError, jwt
 from pwdlib import PasswordHash
 from pwdlib.hashers.argon2 import Argon2Hasher
 from pwdlib.hashers.bcrypt import BcryptHasher
-
 from app.config import settings
 
 password_hash = PasswordHash(
