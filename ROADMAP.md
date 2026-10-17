@@ -1,24 +1,18 @@
-# Todo API Roadmap
+# Состояние и дальнейшая работа
 
-## Architecture
-- [ ] PostgreSQL вместо SQLite
-- [ ] Alembic migrations
-- [ ] Environment configuration
+## Реализовано
 
-## Testing
-- [ ] Increase test coverage
-- [ ] Add integration tests
+- [x] Регистрация, bcrypt, JWT и проверка владельца задачи.
+- [x] CRUD задач.
+- [x] Конфигурация окружения, миграции Alembic.
+- [x] Dockerfile и Compose с PostgreSQL.
+- [x] Автоматические тесты API на изолированной SQLite.
+- [x] CI для Python-тестов.
 
-## Infrastructure
-- [ ] Docker
-- [ ] docker-compose
-- [ ] CI pipeline
+## Следующие задачи
 
-## Security
-- [ ] Rate limiting
-- [ ] Refresh tokens
-- [ ] Password policy
-
-## Observability
-- [ ] Logging
-- [ ] Metrics
+- [ ] PostgreSQL integration tests и проверка контейнерной сборки в CI.
+- [ ] Пагинация и ограничения входных данных задачи.
+- [ ] Refresh-токены и rate limiting.
+- [ ] Structured logging и метрики.
+- [ ] Воспроизводимый lockfile зависимостей; текущие диапазоны не фиксируют транзитивные версии.

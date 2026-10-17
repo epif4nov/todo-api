@@ -1,80 +1,71 @@
 # Todo API
 
-REST API для трекера задач с регистрацией и JWT-авторизацией на FastAPI.
+REST API для личных задач: регистрация, JWT-аутентификация и доступ только к своим данным.
 
-## Возможности
+**Python · FastAPI · SQLAlchemy · Alembic · SQLite / PostgreSQL**
 
-- Регистрация и вход пользователей с хэшированием паролей (bcrypt)
-- JWT-авторизация для защищённых эндпоинтов
-- CRUD задач: создание, просмотр, изменение статуса, удаление
-- Каждый пользователь видит и управляет только своими задачами
-- Автоматическая документация API (Swagger UI)
-- Тесты на pytest с изолированной тестовой базой данных
+## Что реализовано
 
-## Технологии
+- Регистрация с bcrypt-хэшированием; вход через OAuth2 password form и JWT.
+- Создание и список задач, переключение статуса, удаление.
+- Проверка владельца при изменении и удалении задачи.
+- Миграция схемы Alembic, Docker Compose с PostgreSQL 16.
+- Тесты регистрации, входа, CRUD, изоляции пользователей и ограничения пароля в UTF-8 байтах.
 
-- Python 3.12
-- FastAPI
-- SQLAlchemy (ORM)
-- SQLite
-- Pydantic (валидация данных)
-- JWT (python-jose) для авторизации
-- bcrypt (passlib) для хэширования паролей
-- pytest для тестирования
+## Быстрый старт
 
-## Установка
+Python 3.12+, команды из корня репозитория:
 
-```bash
-git clone https://github.com/epif4nov/todo-api.git
-cd todo-api
-python -m venv venv
-source venv/bin/activate  # Windows: venv\Scripts\activate
-pip install -r requirements.txt
+```sh
+python -m venv .venv
+# Linux/macOS:
+source .venv/bin/activate
+# Windows PowerShell: .venv\Scripts\Activate.ps1
+python -m pip install -r requirements.txt
+cp .env.example .env
 ```
 
-## Запуск
+В `.env` задайте `DATABASE_URL=sqlite:///./todo.db`. Создайте собственный `SECRET_KEY` командой `python -c "import secrets; print(secrets.token_urlsafe(32))"` и сохраните его в `.env`. Это локальная настройка; не добавляйте `.env` в Git.
 
-```bash
+```sh
+alembic upgrade head
 uvicorn app.main:app --reload
 ```
 
-После запуска документация доступна по адресу `http://127.0.0.1:8000/docs`
+Swagger UI: `http://127.0.0.1:8000/docs`. Приложение не создаёт таблицы автоматически: миграция обязательна.
 
-## Тесты
+## Проверка
 
-```bash
-pytest tests/ -v
+```sh
+python -m pytest -q
 ```
 
-## Основные эндпоинты
+Тесты сами задают конфигурацию до импорта приложения и используют отдельную SQLite in-memory базу. Рабочая база и пользовательский `.env` для них не нужны. PostgreSQL и сборка Docker проверяются отдельно, эти тесты их не заменяют.
 
-| Метод | Путь | Описание |
-|---|---|---|
-| POST | `/auth/register` | Регистрация нового пользователя |
-| POST | `/auth/login` | Вход, получение JWT-токена |
-| POST | `/tasks/` | Создание задачи (требует авторизации) |
-| GET | `/tasks/` | Список своих задач (требует авторизации) |
-| PATCH | `/tasks/{task_id}` | Переключить статус выполнения задачи |
-| DELETE | `/tasks/{task_id}` | Удалить задачу |
+## Docker / PostgreSQL
 
-## Структура проекта
-
+```sh
+docker compose up -d postgres
+# Дождитесь healthy-состояния PostgreSQL:
+docker compose ps
+docker compose run --rm api alembic upgrade head
+docker compose up -d api
 ```
-todo-api/
-├── app/
-│   ├── main.py            # точка входа, создание FastAPI-приложения
-│   ├── database.py         # подключение к SQLite, сессия SQLAlchemy
-│   ├── models.py            # ORM-модели: User, Task
-│   ├── schemas.py            # Pydantic-схемы валидации
-│   ├── security.py           # хэширование паролей, JWT
-│   ├── dependencies.py       # get_db, get_current_user
-│   └── routers/
-│       ├── auth.py            # регистрация и вход
-│       └── tasks.py           # CRUD задач
-├── tests/
-│   ├── conftest.py            # тестовая база данных и fixtures
-│   └── test_auth.py           # тесты регистрации и входа
-├── main.py
-├── requirements.txt
-└── README.md
-```
+
+API доступен на порту `8001`, PostgreSQL — `5433`. `.env.docker` и учётные данные Compose предназначены для локальной разработки; перед внешним развёртыванием замените их. Удаление тома удаляет данные.
+
+## Контракт API
+
+| Метод | Путь | Действие |
+| --- | --- | --- |
+| POST | `/auth/register` | JSON: email, password |
+| POST | `/auth/login` | Form: username=email, password |
+| GET / POST | `/tasks/` | Список / создание задачи с Bearer-токеном |
+| PATCH | `/tasks/{id}` | Переключение is_done |
+| DELETE | `/tasks/{id}` | Удаление своей задачи |
+
+Архитектура: `routers → dependencies / security → SQLAlchemy models → database`. Конфигурация — `app/config.py`, схема — `app/schemas.py`, миграции — `alembic/`, проверки — `tests/`.
+
+## Границы проекта
+
+Это учебное API. Пока нет пагинации, refresh-токенов, rate limiting и отдельного PostgreSQL integration suite. Подробности — [ROADMAP.md](ROADMAP.md).

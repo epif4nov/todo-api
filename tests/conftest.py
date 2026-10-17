@@ -1,3 +1,10 @@
+import os
+import secrets
+
+# Set isolated test configuration before importing application settings.
+os.environ["DATABASE_URL"] = "sqlite:///:memory:"
+os.environ["SECRET_KEY"] = secrets.token_urlsafe(32)
+
 import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
@@ -27,5 +34,6 @@ app.dependency_overrides[get_db] = override_get_db
 @pytest.fixture
 def client():
     Base.metadata.create_all(bind=engine)
-    yield TestClient(app)
+    with TestClient(app) as test_client:
+        yield test_client
     Base.metadata.drop_all(bind=engine)
